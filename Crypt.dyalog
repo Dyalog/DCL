@@ -271,7 +271,7 @@
           D←_Decrypt P D
       :Case 6
           :Trap 0
-              Init ''
+              Init''
               D←_Decrypt P D
           :Else
               ⎕SIGNAL ⎕EN
@@ -286,7 +286,7 @@
           D←_Encrypt P D
       :Case 6
           :Trap 0
-              Init ''
+              Init''
               D←_Encrypt P D
           :Else
               ⎕SIGNAL ⎕EN
@@ -301,7 +301,7 @@
           D←_Hash P D
       :Case 6
           :Trap 0
-              Init ''
+              Init''
               D←_Hash P D
           :Else
               ⎕SIGNAL ⎕EN
@@ -316,7 +316,7 @@
           D←_PKey P D
       :Case 6
           :Trap 0
-              Init ''
+              Init''
               D←_PKey P D
           :Else
               ⎕SIGNAL ⎕EN
@@ -331,7 +331,7 @@
           D←_Random⊂D
       :Case 6
           :Trap 0
-              Init ''
+              Init''
               D←_Random⊂D
           :Else
               ⎕SIGNAL ⎕EN
@@ -362,7 +362,7 @@
       r←r((⎕IO+∨/'-64'⍷apl)⊃'32' '64')
     ∇
 
-    ∇ {RCode}←Init path;platform;dirsep;ExtractPath;wspath;curpath;exepath;AddSep;dll;dir;path;FileExists;found;Library
+    ∇ {RCode}←Init path;platform;dirsep;ExtractPath;wspath;curpath;exepath;AddSep;dll;dir;path;FileExists;found;Library;scriptpath
       :Trap 0
           platform←Platform
           dirsep←'/\'[⎕IO+'win'≡⎕IO⊃platform]
@@ -371,6 +371,8 @@
           FileExists←{0::0 ⋄ 1⊣⎕NUNTIE ⍵ ⎕NTIE 0}
      
           dir←(('aix' 'lin' 'arm' 'win'⍳⊂⎕IO⊃platform)⊃'aix' 'linux' 'pi' 'windows'),dirsep
+     
+          scriptpath←{0::'' ⋄ ExtractPath ⎕THIS⍎'SALT_DATA.SourceFile'}''
      
           :If 'win'≡⎕IO⊃platform
               wspath←AddSep{⍵{⍵{⎕EX ⍺:⍵}(ExtractPath↑↑/2↑_GetFullPathName ⎕WSID 1024 1024 0),'\',⍺}'_GetFullPathName'⎕NA'I KERNEL32|GetFullPathName* <0T I >T[] >I'}''
@@ -387,7 +389,7 @@
           :Hold '#.Crypt.Init'
               :If 0=⎕NC'_Hash'
                   :If 0∊⍴path
-                      :For path :In wspath curpath exepath
+                      :For path :In scriptpath wspath curpath exepath
                           :If found←FileExists Library←path,dll ⋄ :Leave ⋄ :EndIf
                           :If found←FileExists Library←path,dir,dll ⋄ :Leave ⋄ :EndIf
                       :EndFor
