@@ -372,7 +372,9 @@
      
           dir←(('aix' 'lin' 'arm' 'win'⍳⊂⎕IO⊃platform)⊃'aix' 'linux' 'pi' 'windows'),dirsep
      
-          scriptpath←{0::'' ⋄ ExtractPath ⎕THIS⍎'SALT_DATA.SourceFile'}''
+          :If 0=≢scriptpath←{0::'' ⋄ AddSep ExtractPath ⍵⍎'SALT_Data.SourceFile'}⎕THIS
+              scriptpath←1⊃⎕NPARTS ⎕SE.Link.GetFileName 1⊃⎕SI
+          :EndIf
      
           :If 'win'≡⎕IO⊃platform
               wspath←AddSep{⍵{⍵{⎕EX ⍺:⍵}(ExtractPath↑↑/2↑_GetFullPathName ⎕WSID 1024 1024 0),'\',⍺}'_GetFullPathName'⎕NA'I KERNEL32|GetFullPathName* <0T I >T[] >I'}''
