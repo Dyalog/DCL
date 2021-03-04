@@ -373,7 +373,7 @@
           dir←(('aix' 'lin' 'arm' 'win'⍳⊂⎕IO⊃platform)⊃'aix' 'linux' 'pi' 'windows'),dirsep
      
           :If 0=≢scriptpath←{0::'' ⋄ AddSep ExtractPath ⍵⍎'SALT_Data.SourceFile'}⎕THIS
-              scriptpath←1⊃⎕NPARTS 4⊃5179⌶1⊃⎕SI
+              scriptpath←1⊃⎕nparts ⎕se.Link.GetFileName 1⊃⎕SI
           :EndIf
      
           :If 'win'≡⎕IO⊃platform
