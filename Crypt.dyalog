@@ -274,10 +274,10 @@
               Init''
               D←_Decrypt P D
           :Else
-              ⎕SIGNAL ⎕EN
+              (1⊃⎕DM)⎕SIGNAL ⎕EN
           :EndTrap
       :Else
-          ⎕SIGNAL ⎕EN
+          (1⊃⎕DM)⎕SIGNAL ⎕EN
       :EndTrap
     ∇
 
@@ -289,10 +289,10 @@
               Init''
               D←_Encrypt P D
           :Else
-              ⎕SIGNAL ⎕EN
+              (1⊃⎕DM)⎕SIGNAL ⎕EN
           :EndTrap
       :Else
-          ⎕SIGNAL ⎕EN
+          (1⊃⎕DM)⎕SIGNAL ⎕EN
       :EndTrap
     ∇
 
@@ -304,10 +304,10 @@
               Init''
               D←_Hash P D
           :Else
-              ⎕SIGNAL ⎕EN
+              (1⊃⎕DM)⎕SIGNAL ⎕EN
           :EndTrap
       :Else
-          ⎕SIGNAL ⎕EN
+          (1⊃⎕DM)⎕SIGNAL ⎕EN
       :EndTrap
     ∇
 
@@ -319,10 +319,10 @@
               Init''
               D←_PKey P D
           :Else
-              ⎕SIGNAL ⎕EN
+              (1⊃⎕DM)⎕SIGNAL ⎕EN
           :EndTrap
       :Else
-          ⎕SIGNAL ⎕EN
+          (1⊃⎕DM)⎕SIGNAL ⎕EN
       :EndTrap
     ∇
 
@@ -334,10 +334,10 @@
               Init''
               D←_Random⊂D
           :Else
-              ⎕SIGNAL ⎕EN
+              (1⊃⎕DM)⎕SIGNAL ⎕EN
           :EndTrap
       :Else
-          ⎕SIGNAL ⎕EN
+          (1⊃⎕DM)⎕SIGNAL ⎕EN
       :EndTrap
     ∇
 
@@ -373,7 +373,7 @@
           dir←(('aix' 'lin' 'arm' 'win'⍳⊂⎕IO⊃platform)⊃'aix' 'linux' 'pi' 'windows'),dirsep
      
           :If 0=≢scriptpath←{0::'' ⋄ AddSep ExtractPath ⍵⍎'SALT_Data.SourceFile'}⎕THIS
-              scriptpath←1⊃⎕NPARTS 5179⌶1⊃⎕SI
+              scriptpath←1⊃⎕NPARTS 4⊃5179⌶⍕⎕THIS
           :EndIf
      
           :If 'win'≡⎕IO⊃platform
@@ -1402,7 +1402,7 @@
               Password Salt RepMod←64 64 64 64 64 64 64 64 64 64 128 128 0[##.(HASH_WP HASH_MD2 HASH_MD4 HASH_MD5 HASH_MDC2 HASH_RMD160 HASH_SHA HASH_SHA1 HASH_SHA224 HASH_SHA256 HASH_SHA384 HASH_SHA512)⍳AlgIdHash]
               DerivedKey←AlgIdHash Count DerivedKeyLength ID ##.Hash Salt,Password
           :Else
-              ⎕SIGNAL ⎕EN
+              (1⊃⎕DM)⎕SIGNAL ⎕EN
           :EndTrap
         ∇
 
@@ -1437,7 +1437,7 @@
           :Trap 0
               DerivedKey←AlgIdHash Count DerivedKeyLength ##.Hash Password,Salt
           :Else
-              ⎕SIGNAL ⎕EN
+              (1⊃⎕DM)⎕SIGNAL ⎕EN
           :EndTrap
         ∇
 
@@ -1469,7 +1469,7 @@
           :Trap 0
               DerivedKey←AlgIdHash Password Count DerivedKeyLength ##.Hash Salt
           :Else
-              ⎕SIGNAL ⎕EN
+              (1⊃⎕DM)⎕SIGNAL ⎕EN
           :EndTrap
         ∇
 
