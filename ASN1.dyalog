@@ -1,4 +1,4 @@
-﻿:Namespace ASN1
+:Namespace ASN1
 
     :section Variables
 ⍝ === VARIABLES ===
@@ -99,7 +99,7 @@
           C←_AdjustASN1⊂C
       :Case 6
           :Trap 0
-              Init ''
+              Init''
               C←_AdjustASN1⊂C
           :Else
               ⎕SIGNAL ⎕EN
@@ -141,7 +141,7 @@
               C←_CodeASN1 P C
           :Case 6
               :Trap 0
-                  Init ''
+                  Init''
                   C←_CodeASN1 P C
               :Else
                   ⎕SIGNAL ⎕EN
@@ -154,7 +154,7 @@
               C←_CodeASN1 ⍬ C
           :Case 6
               :Trap 0
-                  Init ''
+                  Init''
                   C←_CodeASN1 ⍬ C
               :Else
                   ⎕SIGNAL ⎕EN
@@ -178,50 +178,45 @@
 
     ∇ r←Platform;apl
     ⍝ return best guess for the platform we're running on
-      :If 'lin'≡r←{('abcdefghijklmnopqrstuvwxyz',⍵)[(⎕A,⍵)⍳⍵]}3↑apl←⎕IO⊃'.'⎕WG'APLVersion'
+      :If 'lin'≡r←{('abcdefghijklmnopqrstuvwxyz',⍵)[(⎕A,⍵)⍳⍵]}3↑apl←1⊃'.'⎕WG'APLVersion'
           :If 'armv'≡4↑↑⎕SH'uname -m'  ⍝!!! warning, could be Android someday
               r←'arm'
           :EndIf
       :EndIf
-      r←r((⎕IO+∨/'-64'⍷apl)⊃'32' '64')
+      r←r((1+∨/'-64'⍷apl)⊃'32' '64')
     ∇
 
-    ∇ {RCode}←Init path;Library;platform;dirsep;ExtractPath;AddSep;FileExists;dir;wspath;curpath;exepath;dll;path;found
+    ∇ RCode←Init path;platform;width;dlldir;scriptpath;dll;wspath;curpath;exepath;found;Library
       :Trap 0
-          platform←Platform
-          dirsep←'/\'[⎕IO+'win'≡⎕IO⊃platform]
-          ExtractPath←{(⍵{(':'=⍬⍴(¯1-⍵)↑⍺)-⍵}(⌽⍵)⍳dirsep)↓⍵}
-          AddSep←{⍵,dirsep↓⍨dirsep=¯1↑⍵}
-          FileExists←{0::0 ⋄ 1⊣⎕NUNTIE ⍵ ⎕NTIE 0}
+          (platform width)←Platform
      
-          dir←(('aix' 'lin' 'arm' 'win'⍳⊂⎕IO⊃platform)⊃'aix' 'linux' 'pi' 'windows'),dirsep
+          dlldir←'/',⍨'aix' 'linux' 'pi' 'windows' 'mac'⊃⍨'aix' 'lin' 'arm' 'win' 'mac'⍳⊂platform
      
-          :If 'win'≡⎕IO⊃platform
-              wspath←AddSep{⍵{⍵{⎕EX ⍺:⍵}(ExtractPath↑↑/2↑_GetFullPathName ⎕WSID 1024 1024 0),'\',⍺}'_GetFullPathName'⎕NA'I KERNEL32|GetFullPathName* <0T I >T[] >I'}''
-              curpath←AddSep↑⎕SH'cd'
-              exepath←AddSep{⍵{⍵{⎕EX ⍺:⍵}(ExtractPath↑↑/_GetModuleFileName 0 1024 1024),'\',⍺}'_GetModuleFileName'⎕NA'I KERNEL32|GetModuleFileName* I >T[] I'}''
-              dll←'dyacrypt20_',((⎕IO+1)⊃platform),'.dll'
-          :Else ⍝ everything else is Linux-based (for now)
-              wspath←AddSep ExtractPath ⎕WSID
-              curpath←AddSep↑⎕SH'pwd'
-              exepath←AddSep 2 ⎕NQ'.' 'GetEnvironment' 'DYALOG'
-              dll←'dyacrypt20_',((⎕IO+1)⊃platform),'.so'
+          :If 0=≢scriptpath←{0::'' ⋄ AddSep ExtractPath ⍵⍎'SALT_Data.SourceFile'}⎕THIS
+              scriptpath←1⊃⎕NPARTS 4⊃5179⌶⍕⎕THIS
           :EndIf
      
-          :Hold '#.ASN1.Init'
-              :If 0=⎕NC'_AdjustASN1'
-                  :If 0∊⍴path     
-                      :For path :In wspath curpath exepath
-                          :If found←FileExists Library←path,dll ⋄ :Leave ⋄ :EndIf
-                          :If found←FileExists Library←path,dir,dll ⋄ :Leave ⋄ :EndIf
+          dll←'dyacrypt20_',width,'.',(1+'win'≡platform)⊃'so' 'dll'
+          wspath←1⊃1 ⎕NPARTS ⎕WSID
+          curpath←1⊃1 ⎕NPARTS''
+          exepath←1⊃1 ⎕NPARTS 1⊃2 ⎕NQ'.' 'GetCommandLineArgs'
+     
+          :Hold '#.Crypt.Init'
+              :If 0=⎕NC'_Hash' ⍝ if _Hash already exists, assume we're initialized
+                  :If 0∊⍴path
+                      :For path :In scriptpath wspath curpath exepath
+                          :If ~found←⎕NEXISTS Library←path,dll
+                              found←⎕NEXISTS Library←path,dlldir,dll
+                          :EndIf
+                          :If found ⋄ :Leave ⋄ :EndIf
                       :EndFor
                   :Else
-                      :If ~found←FileExists Library←path,dll
-                          found←FileExists Library←path,dir,dll
+                      :If ~found←⎕NEXISTS Library←path,dll
+                          found←⎕NEXISTS Library←path,dlldir,dll
                       :EndIf
-                  :EndIf                       
-
-                  'Dyalog Cryptographic Library file not found'⎕SIGNAL found↓999
+                  :EndIf
+     
+                  →found↓0⊣RCode←999 ⍝ return 999 if shared library not found
      
      ⍝ AdjustASN1: Adjust Length of an ASN.1 string
                   '_AdjustASN1'⎕NA Library,'|AdjustASN1* =A'
@@ -1855,7 +1850,7 @@
         ∇ Init
           :If 0=⎕NC'v1'
               #.Win.Init
-              #.ASN1.Init ''
+              #.ASN1.Init''
      ⍝ Assignments from X.509 / RFC2459
               v1 v2 v3←0 1 2                                    ⍝ Version values (default v1)
               id_ce_cRLReason←2 5 29 21                         ⍝ Reason for certificate revocation #.Win.CRL_REASON_xx

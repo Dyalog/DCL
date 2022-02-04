@@ -1,4 +1,4 @@
-﻿:Namespace Crypt
+:Namespace Crypt
     (⎕IO ⎕ML ⎕WX)←1 3 1
 
     :Section Constants
@@ -354,65 +354,56 @@
 
     ∇ r←Platform;apl
     ⍝ return best guess for the platform we're running on
-      :If 'lin'≡r←{('abcdefghijklmnopqrstuvwxyz',⍵)[(⎕A,⍵)⍳⍵]}3↑apl←⎕IO⊃'.'⎕WG'APLVersion'
+      :If 'lin'≡r←{('abcdefghijklmnopqrstuvwxyz',⍵)[(⎕A,⍵)⍳⍵]}3↑apl←1⊃'.'⎕WG'APLVersion'
           :If 'armv'≡4↑↑⎕SH'uname -m'  ⍝!!! warning, could be Android someday
               r←'arm'
           :EndIf
       :EndIf
-      r←r((⎕IO+∨/'-64'⍷apl)⊃'32' '64')
+      r←r((1+∨/'-64'⍷apl)⊃'32' '64')
     ∇
 
-    ∇ {RCode}←Init path;platform;dirsep;ExtractPath;wspath;curpath;exepath;AddSep;dll;dir;path;FileExists;found;Library;scriptpath
+    ∇ RCode←Init path;platform;width;dlldir;scriptpath;dll;curpath;wspath;exepath;found;Library
       :Trap 0
-          platform←Platform
-          dirsep←'/\'[⎕IO+'win'≡⎕IO⊃platform]
-          ExtractPath←{(⍵{(':'=⍬⍴(¯1-⍵)↑⍺)-⍵}(⌽⍵)⍳dirsep)↓⍵}
-          AddSep←{⍵,dirsep↓⍨dirsep=¯1↑⍵}
-          FileExists←{0::0 ⋄ 1⊣⎕NUNTIE ⍵ ⎕NTIE 0}
+          (platform width)←Platform
      
-          dir←(('aix' 'lin' 'arm' 'win'⍳⊂⎕IO⊃platform)⊃'aix' 'linux' 'pi' 'windows'),dirsep
+          dlldir←'/',⍨'aix' 'linux' 'pi' 'windows' 'mac'⊃⍨'aix' 'lin' 'arm' 'win' 'mac'⍳⊂platform
      
-          :If 0=≢scriptpath←{0::'' ⋄ AddSep ExtractPath ⍵⍎'SALT_Data.SourceFile'}⎕THIS
+          :If 0=≢scriptpath←{0::'' ⋄ 1⊃1 ⎕NPARTS ⍵⍎'SALT_Data.SourceFile'}⎕THIS
               scriptpath←1⊃⎕NPARTS 4⊃5179⌶⍕⎕THIS
           :EndIf
      
-          :If 'win'≡⎕IO⊃platform
-              wspath←AddSep{⍵{⍵{⎕EX ⍺:⍵}(ExtractPath↑↑/2↑_GetFullPathName ⎕WSID 1024 1024 0),'\',⍺}'_GetFullPathName'⎕NA'I KERNEL32|GetFullPathName* <0T I >T[] >I'}''
-              curpath←AddSep↑⎕SH'cd'
-              exepath←AddSep{⍵{⍵{⎕EX ⍺:⍵}(ExtractPath↑↑/_GetModuleFileName 0 1024 1024),'\',⍺}'_GetModuleFileName'⎕NA'I KERNEL32|GetModuleFileName* I >T[] I'}''
-              dll←'dyacrypt20_',((⎕IO+1)⊃platform),'.dll'
-          :Else ⍝ everything else is Linux-based (for now)
-              wspath←AddSep ExtractPath ⎕WSID
-              curpath←AddSep↑⎕SH'pwd'
-              exepath←AddSep 2 ⎕NQ'.' 'GetEnvironment' 'DYALOG'
-              dll←'dyacrypt20_',((⎕IO+1)⊃platform),'.so'
-          :EndIf
+          dll←'dyacrypt20_',width,'.',(1+'win'≡platform)⊃'so' 'dll'
+          wspath←1⊃1 ⎕NPARTS ⎕WSID
+          curpath←1⊃1 ⎕NPARTS''
+          exepath←1⊃1 ⎕NPARTS 1⊃2 ⎕NQ'.' 'GetCommandLineArgs'
      
           :Hold '#.Crypt.Init'
-              :If 0=⎕NC'_Hash'
+              :If 0=⎕NC'_Hash' ⍝ if _Hash already exists, assume we're initialized
                   :If 0∊⍴path
                       :For path :In scriptpath wspath curpath exepath
-                          :If found←FileExists Library←path,dll ⋄ :Leave ⋄ :EndIf
-                          :If found←FileExists Library←path,dir,dll ⋄ :Leave ⋄ :EndIf
+                          :If ~found←⎕NEXISTS Library←path,dll
+                              found←⎕NEXISTS Library←path,dlldir,dll
+                          :EndIf
+                          :If found ⋄ :Leave ⋄ :EndIf
                       :EndFor
                   :Else
-                      :If ~found←FileExists Library←path,dll
-                          found←FileExists Library←path,dir,dll
+                      :If ~found←⎕NEXISTS Library←path,dll
+                          found←⎕NEXISTS Library←path,dlldir,dll
                       :EndIf
-                  :EndIf
+                  :EndIf 
      
-                  'Dyalog Cryptographic Library file not found'⎕SIGNAL found↓999
+                  →found↓0⊣RCode←999 ⍝ return 999 if shared library not found
      
      ⍝ DyaCryptHash:    Calculate digest
-                  '_Hash'⎕NA Library,'|DyaCryptHash',('AW'[⎕IO+80=⎕DR' ']),' <A =A'
+                  '_Hash'⎕NA Library,'|DyaCryptHash',('AW'[1+80=⎕DR' ']),' <A =A'
      ⍝ DyaCryptRandom:  Generate true random bytes
-                  '_Random'⎕NA Library,'|DyaCryptRandom',('AW'[⎕IO+80=⎕DR' ']),' =A'
+                  '_Random'⎕NA Library,'|DyaCryptRandom',('AW'[1+80=⎕DR' ']),' =A'
      ⍝ DyaCryptEncrypt: Encrypt data with optional digest
-                  '_Encrypt'⎕NA Library,'|DyaCryptEncrypt',('AW'[⎕IO+80=⎕DR' ']),' <A =A'
+                  '_Encrypt'⎕NA Library,'|DyaCryptEncrypt',('AW'[1+80=⎕DR' ']),' <A =A'
      ⍝ DyaCryptDecrypt: Decrypt data with optional verification
-                  '_Decrypt'⎕NA Library,'|DyaCryptDecrypt',('AW'[⎕IO+80=⎕DR' ']),' <A =A'
+                  '_Decrypt'⎕NA Library,'|DyaCryptDecrypt',('AW'[1+80=⎕DR' ']),' <A =A'
      ⍝ DyaCryptPKey:    Generate and compute public/private keys
-                  '_PKey'⎕NA Library,'|DyaCryptPKey',('AW'[⎕IO+80=⎕DR' ']),' <A =A'
+                  '_PKey'⎕NA Library,'|DyaCryptPKey',('AW'[1+80=⎕DR' ']),' <A =A'
      
                                          ⍝ Value Hex  Val.Math Name                      Keysize Blocksz.
                                          ⍝ ---------- -------- ------------------------- ------- --------
