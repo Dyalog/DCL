@@ -186,7 +186,7 @@
       r←r((1+∨/'-64'⍷apl)⊃'32' '64')
     ∇
 
-    ∇ RCode←Init path;platform;width;dlldir;scriptpath;dll;wspath;curpath;exepath;found;Library
+    ∇ {RCode}←Init path;platform;width;dlldir;scriptpath;dll;wspath;curpath;exepath;found;Library
       :Trap 0
           (platform width)←Platform
      
@@ -216,7 +216,7 @@
                       :EndIf
                   :EndIf
      
-                  →found↓0⊣RCode←999 ⍝ return 999 if shared library not found
+                  ('DCL shared library (',dll,') not found') ⎕SIGNAL found↓999
      
      ⍝ AdjustASN1: Adjust Length of an ASN.1 string
                   '_AdjustASN1'⎕NA Library,'|AdjustASN1* =A'
